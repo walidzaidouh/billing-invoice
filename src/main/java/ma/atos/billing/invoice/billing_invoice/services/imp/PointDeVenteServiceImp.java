@@ -45,7 +45,6 @@ public class PointDeVenteServiceImp implements PointDeventeService {
     }
 
     @Override
-    @Transactional
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
