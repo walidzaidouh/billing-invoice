@@ -62,4 +62,27 @@ public class Invoice extends BusnessObject {
     @JoinColumn(name = "point_de_vente_id")
     private  PointDeVente pointDeVente;
 
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Creancier getCreancier() {
+        return creancier;
+    }
+
+    public void setCreancier(Creancier creancier) {
+        this.creancier = creancier;
+    }
+
+    public PointDeVente getPointDeVente() {
+        return pointDeVente;
+    }
+
+    public void setPointDeVente(PointDeVente pointDeVente) {
+        this.pointDeVente = pointDeVente;
+    }
 }
