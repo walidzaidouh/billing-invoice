@@ -1,12 +1,12 @@
 package ma.atos.billing.invoice.billing_invoice.controllers;
 
 import ma.atos.billing.invoice.billing_invoice.dtos.CreancierDto;
+import ma.atos.billing.invoice.billing_invoice.dtos.CreancierSearchCriteria;
 import ma.atos.billing.invoice.billing_invoice.services.CreancierService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/creanciers")
@@ -23,9 +23,13 @@ public class CreancierController {
         return ResponseEntity.ok(creancierService.createCreancier(creancierDto));
     }
 
+    // THIS IS THE CHANGED METHOD
     @GetMapping
-    public ResponseEntity<List<CreancierDto>> getAllCreanciers() {
-        return ResponseEntity.ok(creancierService.getAllCreanciers());
+    public ResponseEntity<Page<CreancierDto>> getAllCreanciers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(creancierService.getAllCreanciers(page, size));
     }
 
     @GetMapping("/{id}")
@@ -50,5 +54,15 @@ public class CreancierController {
     public ResponseEntity<Void> deleteCreancier(@PathVariable Long id) {
         creancierService.deleteCreancier(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Inside CreancierController class
+    @GetMapping("/search")
+    public ResponseEntity<Page<CreancierDto>> searchCreanciers(
+            CreancierSearchCriteria criteria, // Spring automatically maps URL parameters to this object!
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(creancierService.searchCreanciers(criteria, page, size));
     }
 }

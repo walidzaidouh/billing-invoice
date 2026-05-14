@@ -1,19 +1,25 @@
 package ma.atos.billing.invoice.billing_invoice.services;
 
 import ma.atos.billing.invoice.billing_invoice.dtos.CreancierDto;
+import ma.atos.billing.invoice.billing_invoice.dtos.CreancierSearchCriteria;
 import ma.atos.billing.invoice.billing_invoice.entities.Creancier;
 import ma.atos.billing.invoice.billing_invoice.mappers.CreancierMapper;
 import ma.atos.billing.invoice.billing_invoice.repositories.CreancierRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CreancierService {
 
     private final CreancierRepository creancierRepository;
-    private final CreancierMapper creancierMapper; // Inject the mapper
+    private final CreancierMapper creancierMapper;
 
     public CreancierService(CreancierRepository creancierRepository, CreancierMapper creancierMapper) {
         this.creancierRepository = creancierRepository;
@@ -27,12 +33,16 @@ public class CreancierService {
         return creancierMapper.fromEntityToDto(savedEntity);
     }
 
-    // READ (All)
-    public List<CreancierDto> getAllCreanciers() {
-        return creancierRepository.findAll()
-                .stream()
-                .map(creancierMapper::fromEntityToDto)
-                .collect(Collectors.toList());
+    // READ (Paginated) -> THIS IS THE CHANGED METHOD
+    public Page<CreancierDto> getAllCreanciers(int page, int size) {
+        // Create a Pageable object
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Fetch the page from the database
+        Page<Creancier> creancierPage = creancierRepository.findAll(pageable);
+
+        // The Page object has a built-in .map() function to convert Entities to DTOs!
+        return creancierPage.map(creancierMapper::fromEntityToDto);
     }
 
     // READ (By ID)
@@ -47,7 +57,6 @@ public class CreancierService {
         Creancier existingCreancier = creancierRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Creancier not found with id " + id));
 
-        // Update fields
         existingCreancier.setNom(creancierDtoDetails.getNom());
         existingCreancier.setTypeCreancier(creancierDtoDetails.getTypeCreancier());
         existingCreancier.setIce(creancierDtoDetails.getIce());
@@ -66,4 +75,38 @@ public class CreancierService {
     public void deleteCreancier(Long id) {
         creancierRepository.deleteById(id);
     }
+
+    public Page<CreancierDto> searchCreanciers(CreancierSearchCriteria criteria, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Specification<Creancier> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // If 'nom' is provided, add it to the query (using LIKE for partial matches)
+            if (criteria.getNom() != null && !criteria.getNom().isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("nom")), "%" + criteria.getNom().toLowerCase() + "%"));
+            }
+
+            // If 'typeCreancier' is provided, add an exact match
+            if (criteria.getTypeCreancier() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("typeCreancier"), criteria.getTypeCreancier()));
+            }
+
+            // If 'ice' is provided
+            if (criteria.getIce() != null && !criteria.getIce().isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("ice"), criteria.getIce()));
+            }
+
+            // Combine all the "if" statements with AND (Foolproof way)
+            Predicate[] predicateArray = new Predicate[predicates.size()];
+            predicates.toArray(predicateArray);
+
+            return criteriaBuilder.and(predicateArray);
+        };
+
+        // Execute the dynamic query!
+        Page<Creancier> result = creancierRepository.findAll(spec, pageable);
+        return result.map(creancierMapper::fromEntityToDto);
+    }
+
 }
