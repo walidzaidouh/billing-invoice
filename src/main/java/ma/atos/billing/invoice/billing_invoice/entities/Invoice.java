@@ -50,6 +50,8 @@ public class Invoice extends BusnessObject {
     private String description;
 
 
+
+
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
