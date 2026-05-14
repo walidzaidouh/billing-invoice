@@ -1,4 +1,4 @@
-package ma.atos.billing.invoice.billing_invoice.enties;
+package ma.atos.billing.invoice.billing_invoice.entities;
 
 
 import jakarta.persistence.DiscriminatorValue;

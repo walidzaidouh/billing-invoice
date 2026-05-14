@@ -1,4 +1,4 @@
-package ma.atos.billing.invoice.billing_invoice.enties;
+package ma.atos.billing.invoice.billing_invoice.entities;
 
 
 import jakarta.persistence.*;
@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "point_de_vente", schema = "invoice")
-public class PointDeVente {
+public class PointDeVente extends BusnessObject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_seq")

@@ -1,10 +1,13 @@
-package ma.atos.billing.invoice.billing_invoice.enties;
+package ma.atos.billing.invoice.billing_invoice.entities;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.atos.billing.invoice.billing_invoice.enums.ModeReglement;
+import ma.atos.billing.invoice.billing_invoice.enums.StatusInvoice;
 
 import java.time.LocalDate;
 
@@ -13,7 +16,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "invoice", schema = "invoice")
-public class Invoice {
+public class Invoice extends BusnessObject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_seq")
@@ -24,6 +27,7 @@ public class Invoice {
     )
     private Long id;
 
+    @NotBlank
     private String reference;
 
     private LocalDate dateInvoice;
@@ -36,14 +40,19 @@ public class Invoice {
 
     private Double montantTtc;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private StatusInvoice status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "mode_reglement")
+    private ModeReglement modeReglement;
 
     private String description;
 
 
     @ManyToOne
-    @JoinColumn(name = "costumer_id")
-    private Customer costumer;
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     @ManyToOne
     @JoinColumn(name = "creancier_id")

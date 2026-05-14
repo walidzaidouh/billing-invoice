@@ -1,9 +1,13 @@
-package ma.atos.billing.invoice.billing_invoice.enties;
+package ma.atos.billing.invoice.billing_invoice.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.atos.billing.invoice.billing_invoice.entities.BusnessObject;
+import ma.atos.billing.invoice.billing_invoice.entities.Invoice;
 
 import java.util.List;
 
@@ -12,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "customer", schema = "invoice")
-public class Customer {
+public class Customer extends BusnessObject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_seq")
@@ -23,12 +27,16 @@ public class Customer {
     )
     private Long id;
 
+    @NotBlank
     private String nom;
 
+    @NotBlank
     private String prenom;
 
+    @NotBlank
     private String cin;
 
+    @Email
     private String email;
 
     private String telephone;
@@ -37,7 +45,7 @@ public class Customer {
 
     private String ville;
 
-    @OneToMany(mappedBy = "costumer")
+    @OneToMany(mappedBy = "customer")
     private List<Invoice> invoices ;
 
 }

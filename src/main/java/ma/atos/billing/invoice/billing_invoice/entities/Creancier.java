@@ -1,9 +1,15 @@
-package ma.atos.billing.invoice.billing_invoice.enties;
+package ma.atos.billing.invoice.billing_invoice.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ma.atos.billing.invoice.billing_invoice.entities.BusnessObject;
+import ma.atos.billing.invoice.billing_invoice.entities.Invoice;
+import ma.atos.billing.invoice.billing_invoice.enums.TypeCreancier;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -12,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "creancier", schema = "invoice")
-public class Creancier {
+public class Creancier extends BusnessObject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_seq")
@@ -23,7 +29,13 @@ public class Creancier {
     )
     private Long id;
 
+    @NotBlank
     private String nom;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type_creancier")
+    @NotNull
+    private TypeCreancier typeCreancier;
 
     private String ice;
 
