@@ -1,6 +1,8 @@
 package ma.atos.billing.invoice.billing_invoice.services.imp;
 
 import jakarta.persistence.criteria.Predicate;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteDto;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteSearchCriteria;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteType;
@@ -29,15 +31,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PointDeVenteServiceImp implements PointDeventeService {
 
     private final PointDeVenteRepository repository;
     private final PointDeVenteMapper mapper;
 
-    public PointDeVenteServiceImp(PointDeVenteRepository repository, PointDeVenteMapper mapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-    }
+
 
     @Override
     @CacheEvict(value = "pointsDeVente-list", allEntries = true)
@@ -75,23 +75,23 @@ public class PointDeVenteServiceImp implements PointDeventeService {
     @Cacheable(value = "pointDeVente" , key = "#id")
     public PointDeVenteDto getPointDeVenteById(long id) {
         System.out.println("before call find by id");
-        PointDeVente pointDeVente = pointDeVenteRepository.findById(id).orElseThrow(()-> new RuntimeException("point de vente not found"));
+        PointDeVente pointDeVente = repository.findById(id).orElseThrow(()-> new RuntimeException("point de vente not found"));
 
         System.out.println("after call find by id");
 
         if(pointDeVente instanceof Agence agence){
-            AgenceDto agenceDto = pointDeVenteMapper.toAgenceDto(agence);
+            AgenceDto agenceDto = mapper.toAgenceDto(agence);
             return agenceDto;
         }
 
         if(pointDeVente instanceof Distributeur distributeur){
-            DistributeurDto distributeurDto = pointDeVenteMapper.toDistributeurDto(distributeur);
+            DistributeurDto distributeurDto = mapper.toDistributeurDto(distributeur);
             return distributeurDto;
         }
 
 
 
-        return pointDeVenteMapper.toPointDeVenteDto(pointDeVente);
+        return mapper.toPointDeVenteDto(pointDeVente);
 
     }
 

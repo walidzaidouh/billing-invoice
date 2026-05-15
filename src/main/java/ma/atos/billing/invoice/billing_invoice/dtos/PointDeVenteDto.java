@@ -25,6 +25,8 @@ public class PointDeVenteDto {
 
     private String adresse;
 
+    private  PointDeVenteType type ;
+
     private String telephone;
 
     private Date createdDate;
