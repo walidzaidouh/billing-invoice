@@ -25,6 +25,7 @@ public class PointDeVente extends BusnessObject {
     @SequenceGenerator(
             name = "global_seq",
             sequenceName = "global_sequence",
+            schema = "invoice",
             allocationSize = 1
     )
     private Long id;
@@ -37,6 +38,8 @@ public class PointDeVente extends BusnessObject {
 
     @OneToMany(mappedBy = "pointDeVente")
     private List<Invoice> invoices ;
+
+
 
 
 }

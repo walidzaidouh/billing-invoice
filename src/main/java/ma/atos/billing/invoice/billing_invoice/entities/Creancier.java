@@ -1,5 +1,6 @@
 package ma.atos.billing.invoice.billing_invoice.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class Creancier extends BusnessObject {
     @SequenceGenerator(
             name = "global_seq",
             sequenceName = "global_sequence",
+            schema = "invoice",
             allocationSize = 1
     )
     private Long id;
@@ -52,6 +54,7 @@ public class Creancier extends BusnessObject {
     private String adresse;
 
     @OneToMany (mappedBy = "creancier")
+    @JsonIgnore
     private List<Invoice> invoices ;
 
 }

@@ -23,6 +23,7 @@ public class Invoice extends BusnessObject {
     @SequenceGenerator(
             name = "global_seq",
             sequenceName = "global_sequence",
+            schema = "invoice",
             allocationSize = 1
     )
     private Long id;
@@ -48,6 +49,8 @@ public class Invoice extends BusnessObject {
     private ModeReglement modeReglement;
 
     private String description;
+
+
 
 
     @ManyToOne

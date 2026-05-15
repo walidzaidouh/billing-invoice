@@ -4,12 +4,15 @@ import jakarta.persistence.criteria.Predicate;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteDto;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteSearchCriteria;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteType;
+import ma.atos.billing.invoice.billing_invoice.dtos.AgenceDto;
+import ma.atos.billing.invoice.billing_invoice.dtos.DistributeurDto;
 import ma.atos.billing.invoice.billing_invoice.entities.Agence;
 import ma.atos.billing.invoice.billing_invoice.entities.Distributeur;
 import ma.atos.billing.invoice.billing_invoice.entities.PointDeVente;
 import ma.atos.billing.invoice.billing_invoice.mappers.PointDeVenteMapper;
 import ma.atos.billing.invoice.billing_invoice.repository.PointDeVenteRepository;
 import ma.atos.billing.invoice.billing_invoice.services.PointDeventeService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -67,35 +70,50 @@ public class PointDeVenteServiceImp implements PointDeventeService {
 
         repository.deleteById(id);
     }
-
+  
     @Override
+    @Cacheable(value = "pointDeVente" , key = "#id")
     public PointDeVenteDto getPointDeVenteById(long id) {
-        PointDeVente pointDeVente = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        System.out.println("before call find by id");
+        PointDeVente pointDeVente = pointDeVenteRepository.findById(id).orElseThrow(()-> new RuntimeException("point de vente not found"));
 
-        return mapToTypedDto(pointDeVente);
+        System.out.println("after call find by id");
+
+        if(pointDeVente instanceof Agence agence){
+            AgenceDto agenceDto = pointDeVenteMapper.toAgenceDto(agence);
+            return agenceDto;
+        }
+
+        if(pointDeVente instanceof Distributeur distributeur){
+            DistributeurDto distributeurDto = pointDeVenteMapper.toDistributeurDto(distributeur);
+            return distributeurDto;
+        }
+
+
+
+        return pointDeVenteMapper.toPointDeVenteDto(pointDeVente);
+
     }
 
     @Override
+    @Cacheable(value = "pointDeVenteList" , key = "#criteria.nom + '-' + #criteria.type_point_de_vente + '-' + #criteria.region + '-' + #page")
     public Page<PointDeVenteDto> searchPointDeVente(PointDeVenteSearchCriteria criteria, int page, int size) {
+
         Pageable pageable = PageRequest.of(page, size);
 
         Specification<PointDeVente> spec = (root, query, cb) -> {
+
             List<Predicate> predicates = new ArrayList<>();
 
-            if (hasText(criteria.getNom())) {
-                predicates.add(cb.like(cb.lower(root.get("nom")), likeValue(criteria.getNom())));
+            if (criteria.getNom() != null && !criteria.getNom().isEmpty()) {
+                predicates.add(
+                        cb.like(cb.lower(root.get("nom")),
+                                "%" + criteria.getNom().toLowerCase() + "%")
+                );
             }
 
-            if (hasText(criteria.getAdresse())) {
-                predicates.add(cb.like(cb.lower(root.get("adresse")), likeValue(criteria.getAdresse())));
-            }
+            if (criteria.getType_point_de_vente() != null && !criteria.getType_point_de_vente().isEmpty()) {
 
-            if (hasText(criteria.getTelephone())) {
-                predicates.add(cb.like(cb.lower(root.get("telephone")), likeValue(criteria.getTelephone())));
-            }
-
-            if (hasText(criteria.getType_point_de_vente())) {
                 if ("AGENCE".equalsIgnoreCase(criteria.getType_point_de_vente())) {
                     predicates.add(cb.equal(root.type(), Agence.class));
                 } else if ("DISTRIBUTEUR".equalsIgnoreCase(criteria.getType_point_de_vente())) {
