@@ -2,7 +2,7 @@ package ma.atos.billing.invoice.billing_invoice.controllers;
 
 import ma.atos.billing.invoice.billing_invoice.dtos.CreancierDto;
 import ma.atos.billing.invoice.billing_invoice.dtos.CreancierSearchCriteria;
-import ma.atos.billing.invoice.billing_invoice.services.CreancierService;
+import ma.atos.billing.invoice.billing_invoice.services.imp.CreancierServiceImp;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +12,9 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/creanciers")
 public class CreancierController {
 
-    private final CreancierService creancierService;
+    private final CreancierServiceImp creancierService;
 
-    public CreancierController(CreancierService creancierService) {
+    public CreancierController(CreancierServiceImp creancierService) {
         this.creancierService = creancierService;
     }
 

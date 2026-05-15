@@ -15,9 +15,14 @@ import org.springframework.context.annotation.Import;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-// 1. Starts the full Spring Boot app on a random port to avoid conflicts
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-// 2. Tells Spring to use your Testcontainers Postgres DB instead of the one in application.yaml
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "spring.flyway.enabled=false",                                     // 1. Turn off Flyway so it doesn't crash on V1/V2
+                "spring.jpa.hibernate.ddl-auto=create-drop",                       // 2. Let Hibernate build the tables from your Entities
+                "spring.jpa.properties.hibernate.hbm2ddl.create_namespaces=true"   // 3. Tell Hibernate to create the 'invoice' schema automatically
+        }
+)
 @Import(TestcontainersConfiguration.class)
 public class CreancierIntegrationTest {
 
