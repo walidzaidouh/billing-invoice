@@ -1,5 +1,7 @@
 package ma.atos.billing.invoice.billing_invoice.mappers;
 
+import ma.atos.billing.invoice.billing_invoice.dtos.AgenceDto;
+import ma.atos.billing.invoice.billing_invoice.dtos.DistributeurDto;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteDto;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteType;
 import ma.atos.billing.invoice.billing_invoice.entities.Agence;
@@ -34,6 +36,14 @@ public interface PointDeVenteMapper {
 
     @Mapping(target = "type", constant = "DISTRIBUTEUR")
     PointDeVenteDto toDto(Distributeur entity);
+
+    PointDeVenteDto toPointDeVenteDto(PointDeVente pointDeVente);
+
+    @Mapping(target = "type", constant = "AGENCE")
+    AgenceDto toAgenceDto(Agence agence);
+
+    @Mapping(target = "type", constant = "DISTRIBUTEUR")
+    DistributeurDto toDistributeurDto(Distributeur distributeur);
 
     default PointDeVente toEntity(PointDeVenteDto dto) {
         if (dto == null) {
