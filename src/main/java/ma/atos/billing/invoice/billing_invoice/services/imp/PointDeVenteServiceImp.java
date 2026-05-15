@@ -36,7 +36,7 @@ public class PointDeVenteServiceImp  implements PointDeventeService {
 
     @Override
     public PointDeVenteDto getPointDeVenteById(long id) {
-        PointDeVente pointDeVente = pointDeVenteRepository.findById(id).orElseThrow(()-> new RuntimeException("kkkkk"));
+        PointDeVente pointDeVente = pointDeVenteRepository.findById(id).orElseThrow(()-> new RuntimeException("point de vente not found"));
         if(pointDeVente instanceof Agence agence){
             AgenceDto agenceDto = pointDeVenteMapper.toAgenceDto(agence);
             return agenceDto;
