@@ -21,11 +21,13 @@ import java.util.Date;
 @NoArgsConstructor
 public class BusnessObject {
 
+    // Renseigne automatiquement la date de creation lors du premier insert.
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date")
     private Date createdDate;
 
+    // Renseigne automatiquement la date de derniere modification lors d'un update.
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_date")
