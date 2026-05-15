@@ -4,7 +4,7 @@ import ma.atos.billing.invoice.billing_invoice.dtos.CreancierDto;
 import ma.atos.billing.invoice.billing_invoice.dtos.CreancierSearchCriteria;
 import ma.atos.billing.invoice.billing_invoice.entities.Creancier;
 import ma.atos.billing.invoice.billing_invoice.mappers.CreancierMapper;
-import ma.atos.billing.invoice.billing_invoice.repositories.CreancierRepository;
+import ma.atos.billing.invoice.billing_invoice.repository.CreancierRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

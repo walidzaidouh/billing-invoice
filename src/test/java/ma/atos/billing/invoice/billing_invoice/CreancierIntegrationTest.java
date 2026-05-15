@@ -4,7 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import ma.atos.billing.invoice.billing_invoice.dtos.CreancierDto;
 import ma.atos.billing.invoice.billing_invoice.enums.TypeCreancier;
-import ma.atos.billing.invoice.billing_invoice.repositories.CreancierRepository;
+import ma.atos.billing.invoice.billing_invoice.repository.CreancierRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
