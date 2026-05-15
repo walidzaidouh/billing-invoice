@@ -26,6 +26,7 @@ public class Creancier extends BusnessObject {
     @SequenceGenerator(
             name = "global_seq",
             sequenceName = "global_sequence",
+            schema = "invoice",
             allocationSize = 1
     )
     private Long id;
