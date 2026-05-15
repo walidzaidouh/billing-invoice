@@ -1,75 +1,66 @@
 package ma.atos.billing.invoice.billing_invoice.mappers;
 
-
 import ma.atos.billing.invoice.billing_invoice.dtos.InvoiceDto;
 import ma.atos.billing.invoice.billing_invoice.entities.Creancier;
 import ma.atos.billing.invoice.billing_invoice.entities.Customer;
 import ma.atos.billing.invoice.billing_invoice.entities.Invoice;
 import ma.atos.billing.invoice.billing_invoice.entities.PointDeVente;
-import org.springframework.stereotype.Component;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
-@Component
-public class InvoiceMapper {
+@Mapper(componentModel = "spring")
+public interface InvoiceMapper {
 
-    public InvoiceDto toDto(Invoice entity) {
-        if (entity == null) {
-            return null;
-        }
+    @Mapping(target = "customerId", source = "customer.id")
+    @Mapping(target = "creancierId", source = "creancier.id")
+    @Mapping(target = "pointDeVenteId", source = "pointDeVente.id")
+    InvoiceDto toDto(Invoice entity);
 
-        Long customerId = entity.getCustomer() != null ? entity.getCustomer().getId() : null;
-        Long creancierId = entity.getCreancier() != null ? entity.getCreancier().getId() : null;
-        Long pointDeVenteId = entity.getPointDeVente() != null ? entity.getPointDeVente().getId() : null;
+    @Mapping(target = "customer", ignore = true)
+    @Mapping(target = "creancier", ignore = true)
+    @Mapping(target = "pointDeVente", ignore = true)
+    Invoice toEntity(InvoiceDto dto);
 
-        return new InvoiceDto(
-                entity.getId(),
-                entity.getReference(),
-                entity.getDateInvoice(),
-                entity.getDateDue(),
-                entity.getMontantHt(),
-                entity.getMontantTva(),
-                entity.getMontantTtc(),
-                entity.getStatus(),
-                entity.getModeReglement(),
-                entity.getDescription(),
-                customerId,
-                creancierId,
-                pointDeVenteId,
-                entity.getCreatedDate(),
-                entity.getUpdatedDate()
-        );
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdDate", ignore = true)
+    @Mapping(target = "updatedDate", ignore = true)
+    @Mapping(target = "customer", ignore = true)
+    @Mapping(target = "creancier", ignore = true)
+    @Mapping(target = "pointDeVente", ignore = true)
+    void updateEntityFromDto(@MappingTarget Invoice entity, InvoiceDto dto);
 
-    /**
-     * Create a new invoice entity. Caller provides resolved relation entities.
-     */
-    public Invoice toEntity(InvoiceDto dto, Customer customer, Creancier creancier, PointDeVente pointDeVente) {
+    default Invoice toEntity(
+            InvoiceDto dto,
+            Customer customer,
+            Creancier creancier,
+            PointDeVente pointDeVente
+    ) {
         if (dto == null) {
             return null;
         }
 
-        Invoice entity = new Invoice();
-        entity.setId(dto.getId());
-        updateEntity(entity, dto, customer, creancier, pointDeVente);
-        entity.setCreatedDate(dto.getCreatedDate());
-        entity.setUpdatedDate(dto.getUpdatedDate());
+        Invoice entity = toEntity(dto);
+        entity.setCustomer(customer);
+        entity.setCreancier(creancier);
+        entity.setPointDeVente(pointDeVente);
+
         return entity;
     }
 
-    public void updateEntity(Invoice entity, InvoiceDto dto, Customer customer, Creancier creancier, PointDeVente pointDeVente) {
+    default void updateEntity(
+            @MappingTarget Invoice entity,
+            InvoiceDto dto,
+            Customer customer,
+            Creancier creancier,
+            PointDeVente pointDeVente
+    ) {
         if (entity == null || dto == null) {
             return;
         }
 
-        entity.setReference(dto.getReference());
-        entity.setDateInvoice(dto.getDateInvoice());
-        entity.setDateDue(dto.getDateDue());
-        entity.setMontantHt(dto.getMontantHt());
-        entity.setMontantTva(dto.getMontantTva());
-        entity.setMontantTtc(dto.getMontantTtc());
-        entity.setStatus(dto.getStatus());
-        entity.setModeReglement(dto.getModeReglement());
-        entity.setDescription(dto.getDescription());
-
+        updateEntityFromDto(entity, dto);
         entity.setCustomer(customer);
         entity.setCreancier(creancier);
         entity.setPointDeVente(pointDeVente);

@@ -29,23 +29,16 @@ import jakarta.persistence.criteria.Root;
 
 import java.util.ArrayList;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class InvoiceServiceImp implements InvoiceService {
-     @Autowired
-    private final InvoiceMapper invoiceMapper;
-    @Autowired
-    private InvoiceRepository invoiceRepository ;
+public class InvoiceServiceImpl implements InvoiceService {
 
-
-    @Autowired
+    private final InvoiceRepository invoiceRepository;
     private final CustomerRepository customerRepository;
-    @Autowired
     private final CreancierRepository creancierRepository;
-    @Autowired
     private final PointDeVenteRepository pointDeVenteRepository;
+    private final InvoiceMapper invoiceMapper;
 
     @Override
     public InvoiceDto createInvoice(InvoiceDto invoiceDto) {
@@ -56,6 +49,7 @@ public class InvoiceServiceImp implements InvoiceService {
         Customer customer = getCustomer(invoiceDto.getCustomerId());
         Creancier creancier = getCreancier(invoiceDto.getCreancierId());
         PointDeVente pointDeVente = getPointDeVente(invoiceDto.getPointDeVenteId());
+
         Invoice entity = invoiceMapper.toEntity(invoiceDto, customer, creancier, pointDeVente);
         Invoice saved = invoiceRepository.save(entity);
         return invoiceMapper.toDto(saved);

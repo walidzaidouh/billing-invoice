@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ma.atos.billing.invoice.billing_invoice.enums.ModeReglement;
 import ma.atos.billing.invoice.billing_invoice.enums.StatusInvoice;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "invoice", schema = "invoice")
 public class Invoice extends BusnessObject {
 
@@ -49,9 +51,6 @@ public class Invoice extends BusnessObject {
     private ModeReglement modeReglement;
 
     private String description;
-
-
-
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
