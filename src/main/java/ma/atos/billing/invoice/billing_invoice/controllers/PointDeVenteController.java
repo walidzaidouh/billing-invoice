@@ -27,7 +27,7 @@ public class PointDeVenteController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<PointDeVenteDto>> searchCreanciers(
+    public ResponseEntity<Page<PointDeVenteDto>> searchPointDeVente(
             PointDeVenteSearchCriteria criteria,
             @RequestParam(defaultValue = "0") int page) {
 
