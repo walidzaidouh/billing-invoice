@@ -18,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +37,7 @@ public class PointDeVenteServiceImp implements PointDeventeService {
     }
 
     @Override
+    @CacheEvict(value = "pointsDeVente-list", allEntries = true)
     public PointDeVenteDto create(PointDeVenteDto dto) {
         PointDeVente entity = mapper.toEntity(dto);
         return mapper.toDto(repository.save(entity));
@@ -41,6 +45,7 @@ public class PointDeVenteServiceImp implements PointDeventeService {
 
     @Override
     @Transactional
+    @CachePut(value = "pointDeVente", key = "#id")
     public PointDeVenteDto update(Long id, PointDeVenteDto dto) {
         PointDeVente entity = repository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -54,6 +59,7 @@ public class PointDeVenteServiceImp implements PointDeventeService {
     }
 
     @Override
+    @CacheEvict(value = "pointDeVente", key = "#id")
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
