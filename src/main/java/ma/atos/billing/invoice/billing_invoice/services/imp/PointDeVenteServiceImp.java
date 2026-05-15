@@ -1,10 +1,11 @@
 package ma.atos.billing.invoice.billing_invoice.services.imp;
 
 import jakarta.persistence.criteria.Predicate;
-import ma.atos.billing.invoice.billing_invoice.dtos.AgenceDto;
-import ma.atos.billing.invoice.billing_invoice.dtos.DistributeurDto;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteDto;
 import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteSearchCriteria;
+import ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteType;
+import ma.atos.billing.invoice.billing_invoice.dtos.AgenceDto;
+import ma.atos.billing.invoice.billing_invoice.dtos.DistributeurDto;
 import ma.atos.billing.invoice.billing_invoice.entities.Agence;
 import ma.atos.billing.invoice.billing_invoice.entities.Distributeur;
 import ma.atos.billing.invoice.billing_invoice.entities.PointDeVente;
@@ -16,24 +17,60 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Service
-public class PointDeVenteServiceImp  implements PointDeventeService {
+public class PointDeVenteServiceImp implements PointDeventeService {
 
-    private final PointDeVenteRepository pointDeVenteRepository ;
-    private final PointDeVenteMapper pointDeVenteMapper;
+    private final PointDeVenteRepository repository;
+    private final PointDeVenteMapper mapper;
 
-    public PointDeVenteServiceImp(PointDeVenteRepository pointDeVenteRepository , PointDeVenteMapper pointDeVenteMapper){
-        this.pointDeVenteRepository=pointDeVenteRepository;
-        this.pointDeVenteMapper =pointDeVenteMapper;
+    public PointDeVenteServiceImp(PointDeVenteRepository repository, PointDeVenteMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
     }
 
+    @Override
+    @CacheEvict(value = "pointsDeVente-list", allEntries = true)
+    public PointDeVenteDto create(PointDeVenteDto dto) {
+        PointDeVente entity = mapper.toEntity(dto);
+        return mapper.toDto(repository.save(entity));
+    }
 
+    @Override
+    @Transactional
+    @CachePut(value = "pointDeVente", key = "#id")
+    public PointDeVenteDto update(Long id, PointDeVenteDto dto) {
+        PointDeVente entity = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (dto.getType() != resolveType(entity)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
+        mapper.updateEntity(entity, dto);
+        return mapper.toDto(entity);
+    }
+
+    @Override
+    @CacheEvict(value = "pointDeVente", key = "#id")
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        repository.deleteById(id);
+    }
+  
     @Override
     @Cacheable(value = "pointDeVente" , key = "#id")
     public PointDeVenteDto getPointDeVenteById(long id) {
@@ -84,26 +121,69 @@ public class PointDeVenteServiceImp  implements PointDeventeService {
                 }
             }
 
-            if (criteria.getRegion() != null && !criteria.getRegion().isEmpty()) {
-                predicates.add(
-                        cb.like(cb.lower(root.get("region")),
-                                "%" + criteria.getRegion().toLowerCase() + "%")
-                );
+            if (hasText(criteria.getCodeAgence())) {
+                predicates.add(cb.like(cb.lower(cb.treat(root, Agence.class).get("codeAgence")), likeValue(criteria.getCodeAgence())));
+            }
+
+            if (hasText(criteria.getResponsable())) {
+                predicates.add(cb.like(cb.lower(cb.treat(root, Agence.class).get("responsable")), likeValue(criteria.getResponsable())));
+            }
+
+            if (hasText(criteria.getRegion())) {
+                predicates.add(cb.like(cb.lower(cb.treat(root, Agence.class).get("region")), likeValue(criteria.getRegion())));
+            }
+
+            if (hasText(criteria.getTypeAgence())) {
+                predicates.add(cb.like(cb.lower(cb.treat(root, Agence.class).get("typeAgence")), likeValue(criteria.getTypeAgence())));
+            }
+
+            if (hasText(criteria.getCodeDistributeur())) {
+                predicates.add(cb.like(cb.lower(cb.treat(root, Distributeur.class).get("codeDistributeur")), likeValue(criteria.getCodeDistributeur())));
+            }
+
+            if (hasText(criteria.getZoneDistribution())) {
+                predicates.add(cb.like(cb.lower(cb.treat(root, Distributeur.class).get("zoneDistribution")), likeValue(criteria.getZoneDistribution())));
+            }
+
+            if (hasText(criteria.getNomCommercial())) {
+                predicates.add(cb.like(cb.lower(cb.treat(root, Distributeur.class).get("nomCommercial")), likeValue(criteria.getNomCommercial())));
+            }
+
+            if (criteria.getCommission() != null) {
+                predicates.add(cb.equal(cb.treat(root, Distributeur.class).get("commission"), criteria.getCommission()));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        Page<PointDeVente> result = pointDeVenteRepository.findAll(spec, pageable);
-
-        return result.map(pv -> {
-            if (pv instanceof Agence agence) {
-                return pointDeVenteMapper.toAgenceDto(agence);
-            } else if (pv instanceof Distributeur distributeur) {
-                return pointDeVenteMapper.toDistributeurDto(distributeur);
-            }
-            return pointDeVenteMapper.toPointDeVenteDto(pv);
-        });
+        return repository.findAll(spec, pageable).map(this::mapToTypedDto);
     }
 
+    private PointDeVenteType resolveType(PointDeVente entity) {
+        if (entity instanceof Agence) {
+            return PointDeVenteType.AGENCE;
+        }
+        if (entity instanceof Distributeur) {
+            return PointDeVenteType.DISTRIBUTEUR;
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+
+    private PointDeVenteDto mapToTypedDto(PointDeVente pointDeVente) {
+        if (pointDeVente instanceof Agence agence) {
+            return mapper.toAgenceDto(agence);
+        }
+        if (pointDeVente instanceof Distributeur distributeur) {
+            return mapper.toDistributeurDto(distributeur);
+        }
+        return mapper.toPointDeVenteDto(pointDeVente);
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
+
+    private String likeValue(String value) {
+        return "%" + value.toLowerCase() + "%";
+    }
 }
