@@ -37,15 +37,20 @@ public class PointDeVenteServiceImp  implements PointDeventeService {
     @Override
     public PointDeVenteDto getPointDeVenteById(long id) {
         PointDeVente pointDeVente = pointDeVenteRepository.findById(id).orElseThrow(()-> new RuntimeException("kkkkk"));
+        System.out.println(pointDeVente);
         if(pointDeVente instanceof Agence agence){
             AgenceDto agenceDto = pointDeVenteMapper.toAgenceDto(agence);
+            System.out.println(agenceDto);
             return agenceDto;
         }
 
         if(pointDeVente instanceof Distributeur distributeur){
             DistributeurDto distributeurDto = pointDeVenteMapper.toDistributeurDto(distributeur);
+            System.out.println(distributeurDto);
             return distributeurDto;
         }
+
+
 
         return pointDeVenteMapper.toPointDeVenteDto(pointDeVente);
 
@@ -86,6 +91,7 @@ public class PointDeVenteServiceImp  implements PointDeventeService {
         };
 
         Page<PointDeVente> result = pointDeVenteRepository.findAll(spec, pageable);
+        System.out.println(result.stream().findFirst());
 
         return result.map(pv -> {
             if (pv instanceof Agence agence) {
