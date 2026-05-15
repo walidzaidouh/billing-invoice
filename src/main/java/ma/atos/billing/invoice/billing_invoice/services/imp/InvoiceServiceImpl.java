@@ -15,7 +15,6 @@ import ma.atos.billing.invoice.billing_invoice.repository.CustomerRepository;
 import ma.atos.billing.invoice.billing_invoice.repository.InvoiceRepository;
 import ma.atos.billing.invoice.billing_invoice.repository.PointDeVenteRepository;
 import ma.atos.billing.invoice.billing_invoice.services.InvoiceService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 

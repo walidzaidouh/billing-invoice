@@ -12,6 +12,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
+import static ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteType.AGENCE;
+import static ma.atos.billing.invoice.billing_invoice.dtos.PointDeVenteType.DISTRIBUTEUR;
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PointDeVenteMapper {
 

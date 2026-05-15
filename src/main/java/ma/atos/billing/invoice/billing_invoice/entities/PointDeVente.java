@@ -4,6 +4,7 @@ package ma.atos.billing.invoice.billing_invoice.entities;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "point_de_vente", schema = "invoice")
 public class PointDeVente extends BusnessObject {
 
@@ -38,8 +40,6 @@ public class PointDeVente extends BusnessObject {
 
     @OneToMany(mappedBy = "pointDeVente")
     private List<Invoice> invoices ;
-
-
 
 
 }

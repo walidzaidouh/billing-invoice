@@ -1,9 +1,9 @@
 package ma.atos.billing.invoice.billing_invoice.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ma.atos.billing.invoice.billing_invoice.entities.BusnessObject;
 import ma.atos.billing.invoice.billing_invoice.entities.Invoice;
@@ -18,6 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "creancier", schema = "invoice")
 public class Creancier extends BusnessObject {
 
@@ -54,7 +55,6 @@ public class Creancier extends BusnessObject {
     private String adresse;
 
     @OneToMany (mappedBy = "creancier")
-    @JsonIgnore
     private List<Invoice> invoices ;
 
 }
