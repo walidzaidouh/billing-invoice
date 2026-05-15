@@ -18,9 +18,7 @@ import static org.hamcrest.Matchers.*;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
-                "spring.flyway.enabled=false",                                     // 1. Turn off Flyway so it doesn't crash on V1/V2
-                "spring.jpa.hibernate.ddl-auto=create-drop",                       // 2. Let Hibernate build the tables from your Entities
-                "spring.jpa.properties.hibernate.hbm2ddl.create_namespaces=true"   // 3. Tell Hibernate to create the 'invoice' schema automatically
+                "spring.flyway.baseline-version=0" // <-- This is the magic key! It forces Flyway to run V1.
         }
 )
 @Import(TestcontainersConfiguration.class)
