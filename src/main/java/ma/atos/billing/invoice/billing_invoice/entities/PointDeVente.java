@@ -39,4 +39,6 @@ public class PointDeVente extends BusnessObject {
     private List<Invoice> invoices ;
 
 
+
+
 }
