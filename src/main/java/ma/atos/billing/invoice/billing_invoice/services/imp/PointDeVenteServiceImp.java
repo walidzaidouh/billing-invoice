@@ -11,6 +11,7 @@ import ma.atos.billing.invoice.billing_invoice.entities.PointDeVente;
 import ma.atos.billing.invoice.billing_invoice.mappers.PointDeVenteMapper;
 import ma.atos.billing.invoice.billing_invoice.repository.PointDeVenteRepository;
 import ma.atos.billing.invoice.billing_invoice.services.PointDeventeService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -35,18 +35,20 @@ public class PointDeVenteServiceImp  implements PointDeventeService {
 
 
     @Override
+    @Cacheable(value = "pointDeVente" , key = "#id")
     public PointDeVenteDto getPointDeVenteById(long id) {
-        PointDeVente pointDeVente = pointDeVenteRepository.findById(id).orElseThrow(()-> new RuntimeException("kkkkk"));
-        System.out.println(pointDeVente);
+        System.out.println("before call find by id");
+        PointDeVente pointDeVente = pointDeVenteRepository.findById(id).orElseThrow(()-> new RuntimeException("point de vente not found"));
+
+        System.out.println("after call find by id");
+
         if(pointDeVente instanceof Agence agence){
             AgenceDto agenceDto = pointDeVenteMapper.toAgenceDto(agence);
-            System.out.println(agenceDto);
             return agenceDto;
         }
 
         if(pointDeVente instanceof Distributeur distributeur){
             DistributeurDto distributeurDto = pointDeVenteMapper.toDistributeurDto(distributeur);
-            System.out.println(distributeurDto);
             return distributeurDto;
         }
 
@@ -56,6 +58,8 @@ public class PointDeVenteServiceImp  implements PointDeventeService {
 
     }
 
+    @Override
+    @Cacheable(value = "pointDeVenteList" , key = "#criteria.nom + '-' + #criteria.type_point_de_vente + '-' + #criteria.region + '-' + #page")
     public Page<PointDeVenteDto> searchPointDeVente(PointDeVenteSearchCriteria criteria, int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size);
@@ -91,7 +95,6 @@ public class PointDeVenteServiceImp  implements PointDeventeService {
         };
 
         Page<PointDeVente> result = pointDeVenteRepository.findAll(spec, pageable);
-        System.out.println(result.stream().findFirst());
 
         return result.map(pv -> {
             if (pv instanceof Agence agence) {
