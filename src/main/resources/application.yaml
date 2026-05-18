@@ -11,6 +11,7 @@ spring:
     username: root
     password: eSFHR9u2mbBVLLDJtSG3
     driver-class-name: org.postgresql.Driver
+    cache: false
 
   flyway:
     enabled: true
@@ -28,9 +29,18 @@ spring:
       hibernate:
         format_sql: true
 
-app:
-  feign-client:
-    reference-service:
-      name: reference-service
-      url: http://localhost:8080
-      path: /api/ref/{id}
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        # Retry automatique avant envoi en DLQ
+        retry:
+          enabled: true
+          initial-interval: 2000    # 2s avant 1er retry
+          multiplier: 2             # backoff exponentiel
+          max-attempts: 3           # 3 tentatives max
+          max-interval: 10000       # plafond 10s
+        acknowledge-mode: auto      # nack automatique en cas d'exception

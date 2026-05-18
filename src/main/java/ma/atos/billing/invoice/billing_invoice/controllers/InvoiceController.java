@@ -77,6 +77,11 @@ public class InvoiceController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/reference/{reference}")
+    public ResponseEntity<InvoiceDto> getByReference(@PathVariable String reference) {
+        return ResponseEntity.ok(invoiceService.findByReference(reference));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, Object> response = new HashMap<>();
