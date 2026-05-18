@@ -43,4 +43,11 @@ spring:
           multiplier: 2             # backoff exponentiel
           max-attempts: 3           # 3 tentatives max
           max-interval: 10000       # plafond 10s
-        acknowledge-mode: auto      # nack automatique en cas d'exception
+        acknowledge-mode: auto     # nack automatique en cas d'exception
+
+app:
+  feign-client:
+    reference-service:
+      name: reference-service
+      url: http://localhost:8080
+      path: /api/ref/{id}
