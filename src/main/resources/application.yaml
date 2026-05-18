@@ -27,3 +27,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+app:
+  feign-client:
+    reference-service:
+      name: reference-service
+      url: http://localhost:8080
+      path: /api/ref/{id}

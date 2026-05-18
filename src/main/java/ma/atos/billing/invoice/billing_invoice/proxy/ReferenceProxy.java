@@ -5,9 +5,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "reference-service", url = "http://localhost:8080")
+@FeignClient(name = "${app.feign-client.reference-service.name}", url = "${app.feign-client.reference-service.url}")
 public interface ReferenceProxy {
 
-    @GetMapping("/api/reference/{reference}")
+    @GetMapping("${app.feign-client.reference-service.path}")
     String getReference(@PathVariable String reference);
 }
