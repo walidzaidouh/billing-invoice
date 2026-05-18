@@ -30,7 +30,7 @@ public class InvoiceSearchCriteria {
      */
     private String sortBy;
 
-    private String referenceContains;
+    private String reference;
 
     private StatusInvoice status;
 

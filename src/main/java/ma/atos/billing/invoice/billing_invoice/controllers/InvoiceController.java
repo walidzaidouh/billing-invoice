@@ -1,5 +1,7 @@
 package ma.atos.billing.invoice.billing_invoice.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,10 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
+@Tag(name = "Invoices", description = "Gestion des factures")
 @RestController
 @RequestMapping("/api/invoices")
 @RequiredArgsConstructor
@@ -58,9 +54,9 @@ public class InvoiceController {
         invoiceService.deleteInvoice(id);
         return ResponseEntity.noContent().build();
     }
-
+    @Operation(summary = "Recherche des factures")
     @GetMapping("/search")
-    public ResponseEntity<PageDto<InvoiceDto>> searchGet(InvoiceSearchCriteria criteria) {
+    public ResponseEntity<PageDto<InvoiceDto>> searchGet(@Valid InvoiceSearchCriteria criteria) {
         InvoiceSearchCriteria safeCriteria = criteria != null ? criteria : new InvoiceSearchCriteria();
         Pageable pageable = safeCriteria.toPageable();
 
@@ -75,62 +71,15 @@ public class InvoiceController {
         );
 
         return ResponseEntity.ok(response);
+
+
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
-        Map<String, Object> response = new HashMap<>();
-        Map<String, String> errors = new HashMap<>();
+    @GetMapping("/errors/test-illegal")
+    public void testIllegalArgument() {
 
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            String fieldName = error.getField();
-            Object rejectedValue = error.getRejectedValue();
-
-            if ("modeReglement".equals(fieldName)) {
-                errors.put(
-                        fieldName,
-                        "La valeur '" + rejectedValue + "' est invalide. Valeurs autorisées: "
-                                + Arrays.toString(ModeReglement.values())
-                );
-            } else {
-                errors.put(fieldName, error.getDefaultMessage());
-            }
-        }
-
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("message", "Paramètres de recherche invalides");
-        response.put("errors", errors);
-
-        return ResponseEntity.badRequest().body(response);
-    }
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        Map<String, Object> response = new HashMap<>();
-
-        String fieldName = ex.getName();
-        Object invalidValue = ex.getValue();
-
-        if ("modeReglement".equals(fieldName)) {
-            response.put("status", HttpStatus.BAD_REQUEST.value());
-            response.put("message", "La valeur '" + invalidValue + "' est invalide pour modeReglement");
-            response.put("valeursAutorisees", Arrays.toString(ModeReglement.values()));
-        } else {
-            response.put("status", HttpStatus.BAD_REQUEST.value());
-            response.put("message", "Paramètre invalide: " + fieldName);
-            response.put("valeurRecue", invalidValue);
-        }
-
-        return ResponseEntity.badRequest().body(response);
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleNotFound(EntityNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleBadRequest(IllegalArgumentException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        throw new IllegalArgumentException(
+                "Illegal argument test"
+        );
     }
 }
