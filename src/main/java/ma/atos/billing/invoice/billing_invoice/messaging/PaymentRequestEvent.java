@@ -7,5 +7,6 @@ import java.time.LocalDateTime;
 
 public record PaymentRequestEvent(
         Long invoiceId,
+        Long id,
         StatusInvoice statusInvoice
 ) {}

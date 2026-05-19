@@ -18,21 +18,21 @@ public class PaymentResultListener {
 
     @RabbitListener(queues = RabbitMQConfig.INVOICE_QUEUE)
     public void onPaymentResult(PaymentResultEvent event) {
-        log.info("PaymentResultEvent received: id={} type={} montant={} caisse={} pdv={}",
-                event.id(), event.operationType(), event.montant(),
+        log.info("PaymentResultEvent received: transactionId={} transactionId={} type={} montant={} caisse={} pdv={}",
+                event.id(), event.invoiceId(), event.operationType(), event.montant(),
                 event.caisseId(), event.pdvId());
 
-        if (event.id() == null) {
+        if (event.invoiceId() == null) {
             log.error("PaymentResultEvent has null invoiceId — message ignoré");
             return;
         }
 
         // 1. Mettre à jour le statut de la facture → PAID
-        invoiceService.updateInvoiceStatus(event.id(), StatusInvoice.PAID);
-        log.info("Invoice {} mise à jour → PAID", event.id());
+        invoiceService.updateInvoiceStatus(event.invoiceId(), StatusInvoice.PAID);
+        log.info("Invoice {} mise à jour → PAID", event.invoiceId());
 
         // 2. Publier le statut dans PAYMENT_STATUS_QUEUE
-        invoiceEventPublisher.publishInvoiceStatus(event.id(), StatusInvoice.PAID);
-        log.info("Statut PAID publié dans PAYMENT_STATUS_QUEUE pour invoiceId={}", event.id());
+        invoiceEventPublisher.publishInvoiceStatus(event.invoiceId(),event.id(),StatusInvoice.PAID);
+        log.info("Statut PAID publié dans PAYMENT_STATUS_QUEUE pour invoiceId={}", event.invoiceId());
     }
 }
