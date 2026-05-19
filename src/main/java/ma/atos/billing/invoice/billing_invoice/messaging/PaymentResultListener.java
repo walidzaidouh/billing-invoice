@@ -2,55 +2,37 @@ package ma.atos.billing.invoice.billing_invoice.messaging;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ma.atos.billing.invoice.billing_invoice.config.RabbitMQConfig;
 import ma.atos.billing.invoice.billing_invoice.enums.StatusInvoice;
 import ma.atos.billing.invoice.billing_invoice.services.InvoiceService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-/**
- * Écoute les résultats de paiement publiés par le Payment Service.
- *
- * Queue : payment.result.queue  (voir RabbitMQConfig)
- *
- * Sur PaymentResultEvent.status = "ACCEPTED" → facture passe à PAID
- * Sur PaymentResultEvent.status = "REJECTED" → facture passe à REJECTED
- *
- * En cas d'exception, le message est rejeté et part en DLQ (payment.result.queue.dlq)
- * après épuisement des retries configurés dans application.yaml.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class PaymentResultListener {
 
     private final InvoiceService invoiceService;
+    private final InvoiceEventPublisher invoiceEventPublisher;
 
-    @RabbitListener(queues = RabbitMQConfig.PAYMENT_RESULT_QUEUE)
+    @RabbitListener(queues = RabbitMQConfig.INVOICE_QUEUE)
     public void onPaymentResult(PaymentResultEvent event) {
-        log.info("PaymentResultEvent received: invoiceId={} status={} processedAt={}",
-                event.invoiceId(), event.status(), event.processedAt());
+        log.info("PaymentResultEvent received: id={} type={} montant={} caisse={} pdv={}",
+                event.id(), event.operationType(), event.montant(),
+                event.caisseId(), event.pdvId());
 
-        if (event.invoiceId() == null) {
+        if (event.id() == null) {
             log.error("PaymentResultEvent has null invoiceId — message ignoré");
             return;
         }
 
-        StatusInvoice newStatus = switch (event.status()) {
-            case "ACCEPTED" -> StatusInvoice.PAID;
-            case "REJECTED" -> {
-                log.warn("Payment rejected for invoiceId={} reason={}", event.invoiceId(), event.reason());
-                yield StatusInvoice.REJECTED;
-            }
-            default -> {
-                log.error("Statut inconnu '{}' pour invoiceId={}", event.status(), event.invoiceId());
-                throw new IllegalArgumentException(
-                        "Statut PaymentResultEvent inconnu: " + event.status()
-                );
-            }
-        };
+        // 1. Mettre à jour le statut de la facture → PAID
+        invoiceService.updateInvoiceStatus(event.id(), StatusInvoice.PAID);
+        log.info("Invoice {} mise à jour → PAID", event.id());
 
-        invoiceService.updateInvoiceStatus(event.invoiceId(), newStatus);
-
-        log.info("Invoice {} mise à jour → status={}", event.invoiceId(), newStatus);
+        // 2. Publier le statut dans PAYMENT_STATUS_QUEUE
+        invoiceEventPublisher.publishInvoiceStatus(event.id(), StatusInvoice.PAID);
+        log.info("Statut PAID publié dans PAYMENT_STATUS_QUEUE pour invoiceId={}", event.id());
     }
 }

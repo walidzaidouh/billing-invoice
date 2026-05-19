@@ -105,6 +105,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7721a607397d7b4795c9e58302b4064ab4949336
 <!--        <dependency>-->
 <!--            <groupId>org.springframework.cloud</groupId>-->
 <!--            <artifactId>spring-cloud-starter-vault-config</artifactId>-->
