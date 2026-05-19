@@ -19,10 +19,10 @@ public class InvoiceEventPublisher {
      * Utilise le default exchange ("") avec le nom de la queue comme routing key,
      * car les queues sont créées manuellement dans RabbitMQ (pas bindées à un exchange custom).
      */
-    public void publishInvoiceStatus(Long invoiceId, StatusInvoice status) {
-        PaymentRequestEvent event = new PaymentRequestEvent(invoiceId, status);
+    public void publishInvoiceStatus(Long id,Long invoiceId, StatusInvoice status) {
+        PaymentRequestEvent event = new PaymentRequestEvent(id,invoiceId,status);
 
-        log.info("Publishing invoice status: invoiceId={} status={}", invoiceId, status);
+        log.info("Publishing invoice status: invoiceId={} status={}", invoiceId,id, status);
 
         // default exchange "" → routing key = nom exact de la queue
         rabbitTemplate.convertAndSend("", RabbitMQConfig.PAYMENT_STATUS_QUEUE, event);
