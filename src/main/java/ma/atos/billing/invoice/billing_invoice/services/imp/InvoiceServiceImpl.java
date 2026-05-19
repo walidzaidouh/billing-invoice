@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ma.atos.billing.invoice.billing_invoice.dtos.InvoiceDto;
 import ma.atos.billing.invoice.billing_invoice.dtos.InvoiceSearchCriteria;
+import ma.atos.billing.invoice.billing_invoice.dtos.PublisherInvoice;
 import ma.atos.billing.invoice.billing_invoice.entities.Creancier;
 import ma.atos.billing.invoice.billing_invoice.entities.Customer;
 import ma.atos.billing.invoice.billing_invoice.entities.Invoice;
@@ -58,13 +59,13 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice entity = invoiceMapper.toEntity(invoiceDto, customer, creancier, pdv);
 
         // ✅ Statut forcé à DRAFT à la création — sera mis à jour par PaymentResultListener
-        entity.setStatus(StatusInvoice.DRAFT);
+       // entity.setStatus(StatusInvoice.DRAFT);
 
         Invoice saved = invoiceRepository.save(entity);
         InvoiceDto savedDto = invoiceMapper.toDto(saved);
 
-        // ✅ Publication du PaymentRequestEvent (renommé depuis InvoiceCreatedEvent)
-        invoiceEventPublisher.publishPaymentRequest(savedDto);
+
+
 
         log.info("Invoice created id={} status=DRAFT", saved.getId());
         return savedDto;
@@ -86,7 +87,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         PointDeVente pdv    = getPointDeVente(invoiceDto.getPointDeVenteId());
 
         invoiceMapper.updateEntity(existing, invoiceDto, customer, creancier, pdv);
+        PublisherInvoice publisherInvoice =new PublisherInvoice();
+        publisherInvoice.setIdInvoice(existing.getId());
+        publisherInvoice.setStatusInvoice(StatusInvoice.PAID);
         return invoiceMapper.toDto(invoiceRepository.save(existing));
+
     }
 
     @Override
