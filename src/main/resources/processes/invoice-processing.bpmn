@@ -6,8 +6,13 @@
     </bpmn:startEvent>
     <bpmn:serviceTask id="Activity_1xwkxoi" name="controle-invoice" camunda:delegateExpression="${invoiceControlDelegate}">
       <bpmn:incoming>Flow_1qoo6fr</bpmn:incoming>
+      <bpmn:outgoing>Flow_1kcxglu</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1qoo6fr" sourceRef="StartEvent_1" targetRef="Activity_1xwkxoi" />
+    <bpmn:userTask id="Activity_1qhjxuk" name="test">
+      <bpmn:incoming>Flow_1kcxglu</bpmn:incoming>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1kcxglu" sourceRef="Activity_1xwkxoi" targetRef="Activity_1qhjxuk" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="invoiceValidationProcess">
@@ -18,9 +23,17 @@
       <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
         <dc:Bounds x="162" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1qhjxuk_di" bpmnElement="Activity_1qhjxuk">
+        <dc:Bounds x="570" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1qoo6fr_di" bpmnElement="Flow_1qoo6fr">
         <di:waypoint x="198" y="120" />
         <di:waypoint x="360" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kcxglu_di" bpmnElement="Flow_1kcxglu">
+        <di:waypoint x="460" y="120" />
+        <di:waypoint x="570" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
