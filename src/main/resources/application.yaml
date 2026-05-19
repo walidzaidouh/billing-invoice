@@ -30,10 +30,10 @@ spring:
         format_sql: true
 
   rabbitmq:
-    host: localhost
+    host: 149.56.107.189
     port: 5672
-    username: guest
-    password: guest
+    username: admin
+    password: AgQH5EFSTk8QeHNFwG3c
     listener:
       simple:
         # Retry automatique avant envoi en DLQ

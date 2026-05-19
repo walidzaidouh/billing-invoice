@@ -2,11 +2,10 @@ package ma.atos.billing.invoice.billing_invoice.messaging;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ma.atos.billing.invoice.billing_invoice.dtos.InvoiceDto;
+import ma.atos.billing.invoice.billing_invoice.config.RabbitMQConfig;
+import ma.atos.billing.invoice.billing_invoice.enums.StatusInvoice;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -16,28 +15,16 @@ public class InvoiceEventPublisher {
     private final RabbitTemplate rabbitTemplate;
 
     /**
-     * Publie un PaymentRequestEvent vers le Payment Service après création de la facture.
-     * Exchange : invoice.exchange — routing key : invoice.payment.request
+     * Publie le statut d'une facture dans PAYMENT_STATUS_QUEUE.
+     * Utilise le default exchange ("") avec le nom de la queue comme routing key,
+     * car les queues sont créées manuellement dans RabbitMQ (pas bindées à un exchange custom).
      */
-    public void publishPaymentRequest(InvoiceDto invoiceDto) {
-        PaymentRequestEvent event = new PaymentRequestEvent(
-                invoiceDto.getId(),
-                invoiceDto.getReference(),
-                invoiceDto.getCustomerId(),
-                invoiceDto.getCreancierId(),
-                invoiceDto.getPointDeVenteId(),
-                invoiceDto.getMontantTtc(),
-                invoiceDto.getModeReglement() != null ? invoiceDto.getModeReglement().name() : null,
-                LocalDateTime.now()
-        );
+    public void publishInvoiceStatus(Long invoiceId, StatusInvoice status) {
+        PaymentRequestEvent event = new PaymentRequestEvent(invoiceId, status);
 
-        log.info("Publishing PaymentRequestEvent for invoiceId={} reference={}",
-                event.invoiceId(), event.reference());
+        log.info("Publishing invoice status: invoiceId={} status={}", invoiceId, status);
 
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.INVOICE_EXCHANGE,
-                RabbitMQConfig.PAYMENT_REQUEST_ROUTING_KEY,
-                event
-        );
+        // default exchange "" → routing key = nom exact de la queue
+        rabbitTemplate.convertAndSend("", RabbitMQConfig.PAYMENT_STATUS_QUEUE, event);
     }
 }
